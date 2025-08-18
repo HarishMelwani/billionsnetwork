@@ -433,7 +433,7 @@ export default function App() {
                 <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#083aa8] to-[#1366f2] bg-clip-text text-transparent leading-none">
                   Billions Network
                 </h1>
-                <p className="text-xs sm:text-sm text-slate-500">Image Studio by <a href="https://your-link-here.com" target="_blank" rel="noopener noreferrer" className="hover:underline">0xharish</a></p>
+                <p className="text-xs sm:text-sm text-slate-500">Image Studio by <a href="https://x.com/harishmelwanii" target="_blank" rel="noopener noreferrer" className="hover:underline">0xharish</a></p>
               </div>
             </div>
             <button
@@ -498,9 +498,7 @@ export default function App() {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 border border-slate-200">
               <div className="mb-4 sm:mb-6">
-                <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-1 sm:mb-2">
-                  Upload your image and add the Billions Network branding with precision controls
-                </h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-1 sm:mb-2">Upload your image and add the Billions Network branding with precision controls - by <a href="https://x.com/harishmelwanii" target="_blank" rel="noopener noreferrer" className="hover:underline">0XHarish</a></h2>
                 <p className="text-xs sm:text-sm text-slate-600">
                   
                 </p>
