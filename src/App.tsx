@@ -34,8 +34,7 @@ function App() {
   const previewCanvasRef = useRef<HTMLCanvasElement>(null);
 
   // The Billions Network overlay logo (blue rounded rectangle with two oval eyes)
-  const overlayImageSrc = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDIwMCAxNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMTUwIiByeD0iNDAiIGZpbGw9IiMxMzY2ZjIiLz4KPGVsbGlwc2UgY3g9IjY1IiBjeT0iNzUiIHJ4PSIyNSIgcnk9IjM1IiBmaWxsPSJ3aGl0ZSIvPgo8ZWxsaXBzZSBjeD0iMTM1IiBjeT0iNzUiIHJ4PSIyNSIgcnk9IjM1IiBmaWxsPSJ3aGl0ZSIvPgo8ZWxsaXBzZSBjeD0iNjUiIGN5PSI3NSIgcng9IjEyIiByeT0iMjAiIGZpbGw9ImJsYWNrIi8+CjxlbGxpcHNlIGN4PSIxMzUiIGN5PSI3NSIgcng9IjEyIiByeT0iMjAiIGZpbGw9ImJsYWNrIi8+CjxjaXJjbGUgY3g9IjMwIiBjeT0iNzUiIHI9IjE1IiBmaWxsPSIjMTM2NmYyIi8+CjxjaXJjbGUgY3g9IjE3MCIgY3k9Ijc1IiByPSIxNSIgZmlsbD0iIzEzNjZmMiIvPgo8L3N2Zz4K";
-
+  const overlayImageSrc = "/Billions.png";
   const handleImageUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
