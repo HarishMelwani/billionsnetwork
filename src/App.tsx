@@ -63,6 +63,7 @@ export default function App() {
     overlayStart: OverlayState;
     handle?: number;
   } | null>(null);
+
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [showInfo, setShowInfo] = useState(false);
@@ -108,7 +109,6 @@ export default function App() {
     return img;
   })();
 
-  // Load image and its natural size
   useEffect(() => {
     if (!bgImage) return;
     const img = new window.Image();
@@ -117,7 +117,7 @@ export default function App() {
     img.src = bgImage;
   }, [bgImage]);
 
-  // Draw main canvas (including handles for interactive manipulation)
+  // Draw main canvas (with handles)
   useEffect(() => {
     if (!bgImage || !naturalSize) return;
     const canvas = canvasRef.current;
@@ -134,6 +134,7 @@ export default function App() {
     img.onload = () => {
       ctx.clearRect(0, 0, width, height);
       ctx.drawImage(img, 0, 0, width, height);
+
       const ovPx = percentageToPixels(overlay, width, height);
 
       // Draw overlay
@@ -149,7 +150,7 @@ export default function App() {
       );
       ctx.restore();
 
-      // Draw handles (only on live canvas, not on download)
+      // Draw handles (for live canvas only)
       const handleCoords = [
         { x: -ovPx.w / 2, y: -ovPx.h / 2 },
         { x: ovPx.w / 2, y: -ovPx.h / 2 },
@@ -164,7 +165,8 @@ export default function App() {
           y: ovPx.y + ovPx.h / 2 + ny,
         };
       });
-      // rotate handle (above center)
+
+      // rotate handle
       const theta = (overlay.rotation * Math.PI) / 180;
       const rx =
         ovPx.x +
@@ -174,7 +176,7 @@ export default function App() {
         ovPx.y +
         ovPx.h / 2 +
         (0 * Math.sin(theta) + (-ovPx.h / 2 - 30) * Math.cos(theta));
-      // Draw blue handles
+      
       handleCoords.forEach(({ x, y }) => {
         ctx.beginPath();
         ctx.arc(x, y, HANDLE_SIZE / 2, 0, 2 * Math.PI);
@@ -184,7 +186,6 @@ export default function App() {
         ctx.lineWidth = 2;
         ctx.stroke();
       });
-      // Draw green rotate handle
       ctx.beginPath();
       ctx.arc(rx, ry, HANDLE_SIZE / 2, 0, 2 * Math.PI);
       ctx.fillStyle = "#16a34a";
@@ -196,7 +197,7 @@ export default function App() {
     img.src = bgImage;
   }, [bgImage, overlay, naturalSize]);
 
-  // Handle pointer logic for moving, resizing, rotating overlay
+  // --- Pointer logic for resize/rotate/move ---
   function getHandleAtPoint(x, y, width, height) {
     const ovPx = percentageToPixels(overlay, width, height);
     const handleCoords = [
@@ -229,6 +230,7 @@ export default function App() {
     if (Math.hypot(x - rx, y - ry) < HANDLE_SIZE) return 4;
     return null;
   }
+
   function getCanvasCoords(e) {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
@@ -247,6 +249,7 @@ export default function App() {
       y: (clientY - rect.top) * (canvas.height / rect.height),
     };
   }
+
   function handlePointerDown(e) {
     if (!naturalSize) return;
     const coords = getCanvasCoords(e);
@@ -283,6 +286,7 @@ export default function App() {
       e.preventDefault();
     }
   }
+
   function handlePointerMove(e) {
     if (!drag || !naturalSize) return;
     if (e.touches && e.touches.length === 0) return;
@@ -352,9 +356,11 @@ export default function App() {
     }
     e.preventDefault();
   }
+
   function handlePointerUp() {
     setDrag(null);
   }
+
   const pointerEvents = {
     onMouseDown: handlePointerDown,
     onMouseMove: drag ? handlePointerMove : undefined,
@@ -462,7 +468,7 @@ export default function App() {
             <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-r from-[#083aa8] to-[#1366f2] rounded-xl text-white">
               <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Revolutionizing Blockchain Technology</h3>
               <p className="text-sm sm:text-lg text-blue-100 leading-relaxed">
-                Billions Network is pioneering the next generation of blockchain infrastructure,... (rest unchanged)
+                Billions Network is pioneering the next generation of blockchain infrastructure, designed to serve billions of users worldwide. Our innovative approach combines unparalleled scalability, enterprise-grade security, and user-centric design to create a truly decentralized ecosystem that empowers individuals and businesses alike.
               </p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-6 sm:mb-8">
@@ -480,10 +486,11 @@ export default function App() {
                 </div>
               ))}
             </div>
-            {/* ...Why Choose and Join Ecosystem section unchanged */}
+            {/* Why Choose Billions, Join Our Ecosystem sections can go here */}
           </div>
         </div>
       )}
+
       {/* Main Content */}
       <div className="container mx-auto px-2 py-6 md:px-6 md:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
@@ -557,10 +564,179 @@ export default function App() {
               />
             </div>
           </div>
-          {/* Controls Panel */}
+          {/* Controls Panel WITH SLIDERS */}
           <div className="space-y-6">
-            {/* ...all controls same as your posted code */}
-            {/* Position, Size, Rotation, Quick Actions */}
+
+            {/* Mouse/Touch info */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-3 sm:p-4 border border-blue-200">
+              <div className="flex items-center space-x-2 mb-1">
+                <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">i</span>
+                </div>
+                <h4 className="font-medium text-blue-800 text-sm sm:text-base">Mouse & Touch Controls</h4>
+              </div>
+              <p className="text-xs sm:text-sm text-blue-700">
+                Tap and drag the overlay directly on the canvas to move, resize from corners, rotate from green handle.
+              </p>
+            </div>
+            {/* Position Controls */}
+            <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border border-slate-200">
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-7 h-7 rounded-lg bg-[#083aa8] flex items-center justify-center">
+                  <Move className="w-4 h-4 text-white" />
+                </div>
+                <h3 className="font-semibold text-slate-800 text-base sm:text-lg">Position Controls</h3>
+              </div>
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-slate-600 mb-2">Horizontal Position</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.001"
+                    value={overlay.x_pct}
+                    onChange={(e) => handleSlider("x_pct", e.target.value)}
+                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
+                  />
+                  <div className="flex justify-between text-xs text-slate-500 mt-1 select-none">
+                    <span>Left</span>
+                    <span className="font-medium text-[#083aa8]">{Math.round(overlay.x_pct * 100)}%</span>
+                    <span>Right</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-slate-600 mb-2">Vertical Position</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.001"
+                    value={overlay.y_pct}
+                    onChange={(e) => handleSlider("y_pct", e.target.value)}
+                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
+                  />
+                  <div className="flex justify-between text-xs text-slate-500 mt-1 select-none">
+                    <span>Top</span>
+                    <span className="font-medium text-[#083aa8]">{Math.round(overlay.y_pct * 100)}%</span>
+                    <span>Bottom</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Size Controls */}
+            <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border border-slate-200">
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-7 h-7 rounded-lg bg-[#083aa8] flex items-center justify-center">
+                  <Resize className="w-4 h-4 text-white" />
+                </div>
+                <h3 className="font-semibold text-slate-800 text-base sm:text-lg">Size Controls</h3>
+              </div>
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-slate-600 mb-2">Width</label>
+                  <input
+                    type="range"
+                    min="0.05"
+                    max="0.9"
+                    step="0.001"
+                    value={overlay.w_pct}
+                    onChange={(e) => handleSlider("w_pct", e.target.value)}
+                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
+                  />
+                  <div className="flex justify-between text-xs text-slate-500 mt-1 select-none">
+                    <span>Min</span>
+                    <span className="font-medium text-[#083aa8]">{Math.round(overlay.w_pct * 100)}%</span>
+                    <span>Max</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-slate-600 mb-2">Height</label>
+                  <input
+                    type="range"
+                    min="0.05"
+                    max="0.9"
+                    step="0.001"
+                    value={overlay.h_pct}
+                    onChange={(e) => handleSlider("h_pct", e.target.value)}
+                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
+                  />
+                  <div className="flex justify-between text-xs text-slate-500 mt-1 select-none">
+                    <span>Min</span>
+                    <span className="font-medium text-[#083aa8]">{Math.round(overlay.h_pct * 100)}%</span>
+                    <span>Max</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() =>
+                    setOverlay((prev) => ({ ...prev, w_pct: prev.h_pct }))
+                  }
+                  className="w-full py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all duration-200 text-xs sm:text-sm font-medium"
+                >
+                  Lock Aspect Ratio (Square)
+                </button>
+              </div>
+            </div>
+
+            {/* Rotation Controls */}
+            <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border border-slate-200">
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-7 h-7 rounded-lg bg-[#083aa8] flex items-center justify-center">
+                  <RotateCw className="w-4 h-4 text-white" />
+                </div>
+                <h3 className="font-semibold text-slate-800 text-base sm:text-lg">Rotation Control</h3>
+              </div>
+              <div>
+                <input
+                  type="range"
+                  min="0"
+                  max="360"
+                  value={overlay.rotation}
+                  onChange={(e) => handleSlider("rotation", e.target.value)}
+                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider mb-4"
+                />
+                <div className="flex justify-between text-xs text-slate-500 mb-4 select-none">
+                  <span>0°</span>
+                  <span className="font-medium text-[#083aa8] text-sm sm:text-lg">{Math.round(overlay.rotation)}°</span>
+                  <span>360°</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => handleSlider("rotation", 0)}
+                    className="py-1 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all duration-200 text-xs sm:text-sm font-medium"
+                  >
+                    Reset (0°)
+                  </button>
+                  <button
+                    onClick={() => handleSlider("rotation", 90)}
+                    className="py-1 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all duration-200 text-xs sm:text-sm font-medium"
+                  >
+                    90°
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions */}
+            <div className="bg-gradient-to-r from-[#083aa8] to-[#1366f2] rounded-2xl p-4 sm:p-6 text-white">
+              <h3 className="font-semibold mb-3 text-base sm:text-lg">Quick Actions</h3>
+              <div className="space-y-3">
+                <button
+                  onClick={resetOverlay}
+                  className="w-full py-2 px-4 bg-white/20 hover:bg-white/30 rounded-lg transition-all duration-200 text-xs sm:text-sm font-medium"
+                >
+                  Reset All Settings
+                </button>
+                <div className="text-xs sm:text-sm text-blue-100">
+                  <p className="mb-1 sm:mb-2"><strong>Pro Tip:</strong></p>
+                  <p>
+                    Position the overlay in corners or edges for professional watermarking, or center it for bold branding impact.
+                  </p>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
