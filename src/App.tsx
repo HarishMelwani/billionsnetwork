@@ -466,9 +466,9 @@ export default function App() {
               </button>
             </div>
             <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-r from-[#083aa8] to-[#1366f2] rounded-xl text-white">
-              <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Revolutionizing Blockchain Technology</h3>
+              <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">The Human and AI Network</h3>
               <p className="text-sm sm:text-lg text-blue-100 leading-relaxed">
-                Billions Network is pioneering the next generation of blockchain infrastructure, designed to serve billions of users worldwide. Our innovative approach combines unparalleled scalability, enterprise-grade security, and user-centric design to create a truly decentralized ecosystem that empowers individuals and businesses alike.
+              Prove you’re human and start earning Power — Billions’ reward points. The more you use the network, the more experiences and ongoing rewards you unlock
               </p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-6 sm:mb-8">
