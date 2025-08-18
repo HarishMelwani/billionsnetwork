@@ -498,7 +498,7 @@ export default function App() {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 border border-slate-200">
               <div className="mb-4 sm:mb-6">
-                <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-1 sm:mb-2">Upload your image and add the Billions Network branding with precision controls - by <a href="https://x.com/harishmelwanii" target="_blank" rel="noopener noreferrer" className="hover:underline">0XHarish</a></h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-1 sm:mb-2">Upload your image and add the Billions Network branding - by <a href="https://x.com/harishmelwanii" target="_blank" rel="noopener noreferrer" className="hover:underline">0XHarish</a></h2>
                 <p className="text-xs sm:text-sm text-slate-600">
                   
                 </p>
