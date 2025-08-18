@@ -72,33 +72,33 @@ export default function App() {
   const features = [
     {
       icon: <Zap className="w-6 h-6" />,
-      title: "Lightning-Fast Transactions",
-      description: "Experience unprecedented speed with our advanced blockchain architecture, processing thousands of transactions per second with minimal fees.",
+      title: "Stay Private",
+      description: "Only you control access. Your personal information stays encrypted and private, right on your device.",
     },
     {
       icon: <Shield className="w-6 h-6" />,
-      title: "Enterprise-Grade Security",
-      description: "Built with military-grade encryption and cutting-edge consensus mechanisms to ensure your digital assets are protected 24/7.",
+      title: "Verification for Humans & AI",
+      description: "Billions allows humans and AI to be verified, privately and securely.",
     },
     {
       icon: <Globe className="w-6 h-6" />,
-      title: "Global Decentralized Network",
-      description: "Connect seamlessly from anywhere in the world through our robust, decentralized infrastructure spanning multiple continents.",
+      title: "Verify with Your Phone",
+      description: "No proprietary hardware required. All you need is your phone.",
     },
     {
       icon: <Coins className="w-6 h-6" />,
-      title: "Comprehensive DeFi Ecosystem",
-      description: "Access a full suite of decentralized finance tools including staking, lending, yield farming, and liquidity mining.",
+      title: "Earn Ongoing Rewards",
+      description: "Verify you're human and complete tasks on the Billions Portal to earn rewards.",
     },
     {
       icon: <Users className="w-6 h-6" />,
-      title: "Community-Driven Governance",
-      description: "Participate in democratic decision-making through our innovative DAO structure, where every voice matters in shaping the future.",
+      title: "Identity And accountability for ai",
+      description: "Billions gives humans and AI agents verifiable identities so you can trust the individuals with whom you interact.",
     },
     {
       icon: <TrendingUp className="w-6 h-6" />,
-      title: "Sustainable Growth Model",
-      description: "Built for long-term success with tokenomics designed to reward early adopters while ensuring sustainable ecosystem growth.",
+      title: "Want to go deeper?",
+      description: "Read our technical report on Billions’ Deep Trust Framework.",
     },
   ];
 
