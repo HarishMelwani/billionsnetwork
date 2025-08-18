@@ -455,7 +455,7 @@ export default function App() {
                 <h2 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-[#083aa8] to-[#1366f2] bg-clip-text text-transparent mb-1 sm:mb-2">
                   Billions Network
                 </h2>
-                <p className="text-sm sm:text-lg text-slate-600">The Future of Decentralized Finance</p>
+                <p className="text-sm sm:text-lg text-slate-600">The Human and AI Network</p>
               </div>
               <button
                 onClick={() => setShowInfo(false)}
