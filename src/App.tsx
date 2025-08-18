@@ -499,10 +499,10 @@ export default function App() {
             <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 border border-slate-200">
               <div className="mb-4 sm:mb-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-1 sm:mb-2">
-                  Professional Image Overlay Studio
+                  Upload your image and add the Billions Network branding overlay with precision controls
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-600">
-                  Upload your image and add the Billions Network branding overlay with precision controls
+                  
                 </p>
               </div>
               {!bgImage ? (
