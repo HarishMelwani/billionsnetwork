@@ -1,17 +1,29 @@
 import React, { useState, useRef, useEffect } from "react";
+import {
+  Upload,
+  Download,
+  Move,
+  Maximize as Resize,
+  RotateCw,
+  Info,
+  Zap,
+  Shield,
+  Globe,
+  Coins,
+  Users,
+  TrendingUp,
+} from "lucide-react";
 
 const OVERLAY_INIT = {
-  x_pct: 0.2, // as percent of width
-  y_pct: 0.2, // as percent of height
-  w_pct: 0.3, // as percent of width
-  h_pct: 0.3, // as percent of height
+  x_pct: 0.2,
+  y_pct: 0.2,
+  w_pct: 0.3,
+  h_pct: 0.3,
   rotation: 0,
 };
-
 type OverlayState = typeof OVERLAY_INIT;
 type DragType = "move" | "resize" | "rotate" | null;
-
-const HANDLE_SIZE = 18; // px
+const HANDLE_SIZE = 18;
 
 function percentageToPixels(
   overlay: OverlayState,
@@ -26,7 +38,6 @@ function percentageToPixels(
     rotation: overlay.rotation,
   };
 }
-
 function pixelsToPercentage(
   overlay: { x: number; y: number; w: number; h: number; rotation: number },
   width: number,
@@ -41,7 +52,7 @@ function pixelsToPercentage(
   };
 }
 
-export default function ResponsiveOverlayStudio() {
+export default function App() {
   const [bgImage, setBgImage] = useState<string | null>(null);
   const [naturalSize, setNaturalSize] = useState<{ width: number; height: number } | null>(null);
   const [overlay, setOverlay] = useState<OverlayState>(OVERLAY_INIT);
@@ -49,13 +60,15 @@ export default function ResponsiveOverlayStudio() {
     type: DragType;
     start: { x: number; y: number };
     overlayStart: OverlayState;
-    handle?: number; // 0=tl, 1=tr, 2=br, 3=bl, rotate=4
+    handle?: number;
   } | null>(null);
-
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Load image and set its size
+  // Info Modal state
+  const [showInfo, setShowInfo] = useState(false);
+
+  // Load and store natural image size
   useEffect(() => {
     if (!bgImage) return;
     const img = new window.Image();
@@ -71,25 +84,18 @@ export default function ResponsiveOverlayStudio() {
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
-
-    // Get display size for responsive canvas
     const width = containerRef.current
       ? containerRef.current.offsetWidth
       : naturalSize.width;
     const height = Math.round((naturalSize.height / naturalSize.width) * width);
-
     canvas.width = width;
     canvas.height = height;
-
-    // DRAW background image
     const img = new window.Image();
     img.onload = () => {
       ctx.clearRect(0, 0, width, height);
       ctx.drawImage(img, 0, 0, width, height);
-
-      // DRAW overlay
       const ovPx = percentageToPixels(overlay, width, height);
-
+      // Draw overlay
       ctx.save();
       ctx.translate(ovPx.x + ovPx.w / 2, ovPx.y + ovPx.h / 2);
       ctx.rotate((overlay.rotation * Math.PI) / 180);
@@ -101,25 +107,22 @@ export default function ResponsiveOverlayStudio() {
         ovPx.h
       );
       ctx.restore();
-
-      // DRAW drag handles
+      // Draw handles
       const handleCoords = [
-        // corners: TL, TR, BR, BL
         { x: -ovPx.w / 2, y: -ovPx.h / 2 },
         { x: ovPx.w / 2, y: -ovPx.h / 2 },
         { x: ovPx.w / 2, y: ovPx.h / 2 },
-        { x: -ovPx.w / 2, y: ovPx.h / 2 }
+        { x: -ovPx.w / 2, y: ovPx.h / 2 },
       ].map(({ x, y }) => {
-        // rotate relative to center
         const theta = (overlay.rotation * Math.PI) / 180;
         const nx = x * Math.cos(theta) - y * Math.sin(theta);
         const ny = x * Math.sin(theta) + y * Math.cos(theta);
         return {
           x: ovPx.x + ovPx.w / 2 + nx,
-          y: ovPx.y + ovPx.h / 2 + ny
+          y: ovPx.y + ovPx.h / 2 + ny,
         };
       });
-      // Rotate handle (above top center)
+      // rotate handle
       const theta = (overlay.rotation * Math.PI) / 180;
       const rx =
         ovPx.x +
@@ -129,7 +132,6 @@ export default function ResponsiveOverlayStudio() {
         ovPx.y +
         ovPx.h / 2 +
         (0 * Math.sin(theta) + (-ovPx.h / 2 - 30) * Math.cos(theta));
-      // Draw handles
       handleCoords.forEach(({ x, y }) => {
         ctx.beginPath();
         ctx.arc(x, y, HANDLE_SIZE / 2, 0, 2 * Math.PI);
@@ -139,7 +141,7 @@ export default function ResponsiveOverlayStudio() {
         ctx.lineWidth = 2;
         ctx.stroke();
       });
-      // Draw rotate handle
+      // rotate handle
       ctx.beginPath();
       ctx.arc(rx, ry, HANDLE_SIZE / 2, 0, 2 * Math.PI);
       ctx.fillStyle = "#16a34a";
@@ -151,32 +153,29 @@ export default function ResponsiveOverlayStudio() {
     img.src = bgImage;
   }, [bgImage, overlay, naturalSize]);
 
-  // Billions Network overlay logo
+  // Billions overlay logo
   const overlayImage = (() => {
     const img = new window.Image();
     img.src = "/Billions.png";
     return img;
   })();
 
-  // Figure out which handle is pressed
-  function getHandleAtPoint(x: number, y: number, width: number, height: number) {
+  function getHandleAtPoint(x, y, width, height) {
     const ovPx = percentageToPixels(overlay, width, height);
-    // get corners and rotate them
     const handleCoords = [
       { x: -ovPx.w / 2, y: -ovPx.h / 2 },
       { x: ovPx.w / 2, y: -ovPx.h / 2 },
       { x: ovPx.w / 2, y: ovPx.h / 2 },
-      { x: -ovPx.w / 2, y: ovPx.h / 2 }
+      { x: -ovPx.w / 2, y: ovPx.h / 2 },
     ].map(({ x, y }) => {
       const theta = (overlay.rotation * Math.PI) / 180;
       const nx = x * Math.cos(theta) - y * Math.sin(theta);
       const ny = x * Math.sin(theta) + y * Math.cos(theta);
       return {
         x: ovPx.x + ovPx.w / 2 + nx,
-        y: ovPx.y + ovPx.h / 2 + ny
+        y: ovPx.y + ovPx.h / 2 + ny,
       };
     });
-    // rotate handle (above, offset)
     const theta = (overlay.rotation * Math.PI) / 180;
     const rx =
       ovPx.x +
@@ -186,48 +185,38 @@ export default function ResponsiveOverlayStudio() {
       ovPx.y +
       ovPx.h / 2 +
       (0 * Math.sin(theta) + (-ovPx.h / 2 - 30) * Math.cos(theta));
-    // find handle within range
     for (let i = 0; i < handleCoords.length; i++) {
-      if (
-        Math.hypot(x - handleCoords[i].x, y - handleCoords[i].y) < HANDLE_SIZE
-      )
+      if (Math.hypot(x - handleCoords[i].x, y - handleCoords[i].y) < HANDLE_SIZE)
         return i;
     }
-    // rotate-handle: index 4
     if (Math.hypot(x - rx, y - ry) < HANDLE_SIZE) return 4;
     return null;
   }
-
-  // Get mouse or touch coordinates over canvas
-  function getCanvasCoords(e: React.MouseEvent | React.TouchEvent) {
+  function getCanvasCoords(e) {
     const canvas = canvasRef.current;
     if (!canvas) return { x: 0, y: 0 };
     const rect = canvas.getBoundingClientRect();
     let clientX, clientY;
-    if ((e as React.TouchEvent).touches) {
-      const touch = (e as React.TouchEvent).touches[0];
+    if (e.touches) {
+      const touch = e.touches[0];
       clientX = touch.clientX;
       clientY = touch.clientY;
     } else {
-      clientX = (e as React.MouseEvent).clientX;
-      clientY = (e as React.MouseEvent).clientY;
+      clientX = e.clientX;
+      clientY = e.clientY;
     }
     return {
       x: (clientX - rect.left) * (canvas.width / rect.width),
       y: (clientY - rect.top) * (canvas.height / rect.height),
     };
   }
-
-  // Mouse/touch down
-  function handlePointerDown(e: React.MouseEvent | React.TouchEvent) {
+  function handlePointerDown(e) {
     if (!naturalSize) return;
     const coords = getCanvasCoords(e);
-    const width = canvasRef.current!.width;
-    const height = canvasRef.current!.height;
-
+    const width = canvasRef.current.width;
+    const height = canvasRef.current.height;
     const handle = getHandleAtPoint(coords.x, coords.y, width, height);
     if (handle !== null) {
-      // corner handle: resize, rotate-handle: rotate
       setDrag({
         type: handle === 4 ? "rotate" : "resize",
         start: coords,
@@ -237,16 +226,12 @@ export default function ResponsiveOverlayStudio() {
       e.preventDefault();
       return;
     }
-
-    // check if in overlay (rotated rectangle)
     const ovPx = percentageToPixels(overlay, width, height);
-    // Inverse rotate coords
     const dx = coords.x - (ovPx.x + ovPx.w / 2);
     const dy = coords.y - (ovPx.y + ovPx.h / 2);
     const theta = (-overlay.rotation * Math.PI) / 180;
     const nx = dx * Math.cos(theta) - dy * Math.sin(theta);
     const ny = dx * Math.sin(theta) + dy * Math.cos(theta);
-
     if (
       nx > -ovPx.w / 2 &&
       nx < ovPx.w / 2 &&
@@ -261,16 +246,13 @@ export default function ResponsiveOverlayStudio() {
       e.preventDefault();
     }
   }
-
-  function handlePointerMove(e: React.MouseEvent | React.TouchEvent) {
+  function handlePointerMove(e) {
     if (!drag || !naturalSize) return;
-    if ((e as React.TouchEvent).touches && (e as React.TouchEvent).touches.length === 0) return;
+    if (e.touches && e.touches.length === 0) return;
     const coords = getCanvasCoords(e);
-    const width = canvasRef.current!.width;
-    const height = canvasRef.current!.height;
-
+    const width = canvasRef.current.width;
+    const height = canvasRef.current.height;
     if (drag.type === "move") {
-      // move center
       const deltaX = coords.x - drag.start.x;
       const deltaY = coords.y - drag.start.y;
       const { x_pct, y_pct } = drag.overlayStart;
@@ -281,30 +263,22 @@ export default function ResponsiveOverlayStudio() {
       }));
     }
     if (drag.type === "resize") {
-      // which handle
-      const i = drag.handle!;
+      const i = drag.handle;
       const overlayPx = percentageToPixels(drag.overlayStart, width, height);
-
-      // Find opposite corner
       let anchor;
       if (i === 0) anchor = { x: overlayPx.x + overlayPx.w, y: overlayPx.y + overlayPx.h };
       if (i === 1) anchor = { x: overlayPx.x, y: overlayPx.y + overlayPx.h };
       if (i === 2) anchor = { x: overlayPx.x, y: overlayPx.y };
       if (i === 3) anchor = { x: overlayPx.x + overlayPx.w, y: overlayPx.y };
-      // Calculate after rotation
-      // Transform pointer around anchor, then rotate inverse
       const theta = (-drag.overlayStart.rotation * Math.PI) / 180;
       const dx = coords.x - anchor.x;
       const dy = coords.y - anchor.y;
       const nx = dx * Math.cos(theta) - dy * Math.sin(theta);
       const ny = dx * Math.sin(theta) + dy * Math.cos(theta);
-      // Determine new size
       let w = Math.abs(nx);
       let h = Math.abs(ny);
-      // Optionally, minimum size
       w = Math.max(40, Math.min(w, width));
       h = Math.max(40, Math.min(h, height));
-      // Recompute position to keep anchor stable
       const newX = Math.min(anchor.x, anchor.x + Math.sign(nx) * w);
       const newY = Math.min(anchor.y, anchor.y + Math.sign(ny) * h);
       setOverlay((prev) =>
@@ -327,11 +301,9 @@ export default function ResponsiveOverlayStudio() {
         x: overlayPx.x + overlayPx.w / 2,
         y: overlayPx.y + overlayPx.h / 2,
       };
-      // angle from center to pointer
       const dx = coords.x - center.x;
       const dy = coords.y - center.y;
       let angle = (Math.atan2(dy, dx) * 180) / Math.PI;
-      // Angle from center to top middle before rotation
       let startDx = drag.start.x - center.x;
       let startDy = drag.start.y - center.y;
       let startAngle = (Math.atan2(startDy, startDx) * 180) / Math.PI;
@@ -346,75 +318,436 @@ export default function ResponsiveOverlayStudio() {
   function handlePointerUp() {
     setDrag(null);
   }
-
-  // For responsive design and pointer events
   const pointerEvents = {
-    // Mouse
     onMouseDown: handlePointerDown,
     onMouseMove: drag ? handlePointerMove : undefined,
     onMouseUp: handlePointerUp,
     onMouseLeave: handlePointerUp,
-    // Touch
     onTouchStart: handlePointerDown,
     onTouchMove: drag ? handlePointerMove : undefined,
     onTouchEnd: handlePointerUp,
     onTouchCancel: handlePointerUp,
   };
 
-  // Responsive container styles for canvas
+  // Download
+  function handleDownload() {
+    if (!canvasRef.current) return;
+    const a = document.createElement("a");
+    a.download = "billions-network.png";
+    a.href = canvasRef.current.toDataURL("image/png", 1.0);
+    a.click();
+  }
+
+  // Controls, same as original
+  function handleSlider(key, value) {
+    setOverlay((prev) => ({ ...prev, [key]: Number(value) }));
+  }
+  function resetOverlay() {
+    setOverlay(OVERLAY_INIT);
+  }
+
+  // Info Modal features
+  const features = [
+    {
+      icon: <Zap className="w-6 h-6" />,
+      title: "Lightning-Fast Transactions",
+      description: "Experience unprecedented speed with our advanced blockchain architecture, processing thousands of transactions per second with minimal fees.",
+    },
+    {
+      icon: <Shield className="w-6 h-6" />,
+      title: "Enterprise-Grade Security",
+      description: "Built with military-grade encryption and cutting-edge consensus mechanisms to ensure your digital assets are protected 24/7.",
+    },
+    {
+      icon: <Globe className="w-6 h-6" />,
+      title: "Global Decentralized Network",
+      description: "Connect seamlessly from anywhere in the world through our robust, decentralized infrastructure spanning multiple continents.",
+    },
+    {
+      icon: <Coins className="w-6 h-6" />,
+      title: "Comprehensive DeFi Ecosystem",
+      description: "Access a full suite of decentralized finance tools including staking, lending, yield farming, and liquidity mining.",
+    },
+    {
+      icon: <Users className="w-6 h-6" />,
+      title: "Community-Driven Governance",
+      description: "Participate in democratic decision-making through our innovative DAO structure, where every voice matters in shaping the future.",
+    },
+    {
+      icon: <TrendingUp className="w-6 h-6" />,
+      title: "Sustainable Growth Model",
+      description: "Built for long-term success with tokenomics designed to reward early adopters while ensuring sustainable ecosystem growth.",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-2 sm:p-8">
-      <div className="rounded-2xl max-w-2xl mx-auto shadow-xl bg-white border border-slate-200">
-        <div className="p-2 sm:p-6 flex flex-col gap-4 items-center">
-          <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-2">Responsive Overlay Studio</h2>
-          {!bgImage ? (
-            <div
-              onClick={() => document.getElementById("file-upload")?.click()}
-              className="border-2 border-dashed border-blue-500/30 rounded-xl p-5 sm:p-12 text-center hover:bg-blue-50/30 transition-all duration-200 cursor-pointer group"
-            >
-              <h3 className="text-lg sm:text-xl font-semibold text-slate-700 mb-2">Upload Your Image</h3>
-              <p className="text-sm sm:text-base text-slate-500">Tap to select image</p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      {/* Header */}
+      <header className="bg-white/90 backdrop-blur-sm border-b border-slate-200 sticky top-0 z-50">
+        <div className="container mx-auto px-2 py-4 md:px-6 md:py-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-0">
+            <div className="flex items-center space-x-3">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#083aa8] to-[#1366f2] flex items-center justify-center shadow-lg">
+                <div className="w-8 h-6 rounded-lg bg-white/90 flex items-center justify-center">
+                  <div className="flex space-x-1">
+                    <div className="w-1.5 h-3 bg-[#083aa8] rounded-full"></div>
+                    <div className="w-1.5 h-3 bg-[#083aa8] rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#083aa8] to-[#1366f2] bg-clip-text text-transparent leading-none">
+                  Billions Network
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-500">Overlay Image Studio</p>
+              </div>
             </div>
-          ) : (
-            <div
-              ref={containerRef}
-              className="relative w-full max-w-full"
-              style={{ aspectRatio: `${naturalSize?.width ?? 16}/${naturalSize?.height ?? 9}`, maxWidth: 800 }}
+            <button
+              onClick={() => setShowInfo(!showInfo)}
+              className="flex items-center space-x-2 px-3 py-2 bg-[#083aa8] text-white rounded-lg hover:bg-[#0629a0] transition-all duration-200 shadow-lg hover:shadow-xl text-sm sm:text-base"
             >
-              <canvas
-                ref={canvasRef}
-                {...pointerEvents}
-                className="w-full h-full touch-none select-none rounded-xl shadow"
-                style={{ display: "block" }}
-              />
+              <Info className="w-4 h-4" />
+              <span>About Network</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Info Modal */}
+      {showInfo && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 sm:p-8 max-w-full sm:max-w-6xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex justify-between items-center mb-6 sm:mb-8">
+              <div>
+                <h2 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-[#083aa8] to-[#1366f2] bg-clip-text text-transparent mb-1 sm:mb-2">
+                  Billions Network
+                </h2>
+                <p className="text-sm sm:text-lg text-slate-600">The Future of Decentralized Finance</p>
+              </div>
               <button
-                className="absolute top-3 right-3 p-3 bg-blue-700 rounded-lg text-white"
-                type="button"
-                onClick={() => setBgImage(null)}
+                onClick={() => setShowInfo(false)}
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors text-xl font-semibold"
+                aria-label="Close information modal"
               >
-                Remove
+                ×
               </button>
             </div>
-          )}
-          <input
-            id="file-upload"
-            type="file"
-            accept="image/*"
-            style={{ display: "none" }}
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (!file) return;
-              const reader = new FileReader();
-              reader.onload = (evt) => setBgImage(evt.target?.result as string);
-              reader.readAsDataURL(file);
-            }}
-          />
+            <div className="mb-6 sm:mb-8 p-4 sm:p-6 bg-gradient-to-r from-[#083aa8] to-[#1366f2] rounded-xl text-white">
+              <h3 className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4">Revolutionizing Blockchain Technology</h3>
+              <p className="text-sm sm:text-lg text-blue-100 leading-relaxed">
+                Billions Network is pioneering the next generation of blockchain infrastructure,
+                designed to serve billions of users worldwide. Our innovative approach combines
+                unparalleled scalability, enterprise-grade security, and user-centric design to create
+                a truly decentralized ecosystem that empowers individuals and businesses alike.
+              </p>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-6 sm:mb-8">
+              {features.map((feature, index) => (
+                <div key={index}
+                  className="bg-gradient-to-br from-slate-50 to-blue-50 p-4 sm:p-6 rounded-xl border border-slate-200 hover:shadow-lg transition-all duration-200"
+                >
+                  <div className="flex items-center space-x-3 mb-3 sm:mb-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-[#083aa8] text-white flex items-center justify-center shadow-md">
+                      {feature.icon}
+                    </div>
+                    <h3 className="text-base sm:text-xl font-semibold text-slate-800">{feature.title}</h3>
+                  </div>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">{feature.description}</p>
+                </div>
+              ))}
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 sm:p-6 rounded-xl border border-green-200">
+                <h3 className="text-lg font-semibold text-green-800 mb-2 sm:mb-3">Why Choose Billions Network?</h3>
+                <ul className="space-y-1 sm:space-y-2 text-green-700 text-xs sm:text-sm">
+                  <li className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>Proven track record with institutional partnerships</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>Carbon-neutral blockchain operations</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>24/7 developer support and documentation</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <span>Cross-chain compatibility and interoperability</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="bg-gradient-to-br from-purple-50 to-indigo-50 p-4 sm:p-6 rounded-xl border border-purple-200">
+                <h3 className="text-lg font-semibold text-purple-800 mb-2 sm:mb-3">Join Our Growing Ecosystem</h3>
+                <p className="text-purple-700 text-xs sm:text-sm mb-3 sm:mb-4">
+                  Be part of a revolutionary movement that's reshaping the future of finance,
+                  governance, and digital interaction.
+                </p>
+                <div className="flex items-center space-x-4 text-purple-600 text-xs sm:text-sm">
+                  <div className="text-center">
+                    <div className="font-bold text-base sm:text-lg">1M+</div>
+                    <div>Active Users</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-bold text-base sm:text-lg">50+</div>
+                    <div>Countries</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-bold text-base sm:text-lg">$2B+</div>
+                    <div>TVL</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content */}
+      <div className="container mx-auto px-2 py-6 md:px-6 md:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
+          {/* Canvas Area */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 border border-slate-200">
+              <div className="mb-4 sm:mb-6">
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-1 sm:mb-2">
+                  Professional Image Overlay Studio
+                </h2>
+                <p className="text-xs sm:text-sm text-slate-600">
+                  Upload your image and add the Billions Network branding overlay with precision controls
+                </p>
+              </div>
+              {!bgImage ? (
+                <div
+                  onClick={() => document.getElementById("file-upload")?.click()}
+                  className="border-2 border-dashed border-[#083aa8]/30 rounded-xl p-8 sm:p-12 text-center hover:border-[#083aa8]/50 hover:bg-[#083aa8]/5 transition-all duration-200 cursor-pointer group select-none"
+                >
+                  <Upload className="w-12 h-12 sm:w-16 sm:h-16 text-[#083aa8] mx-auto mb-4 group-hover:scale-110 transition-transform" />
+                  <h3 className="text-lg sm:text-xl font-semibold text-slate-700 mb-1">Upload Your Background Image</h3>
+                  <p className="text-xs sm:text-sm text-slate-500">Drag & drop your image here or click to browse</p>
+                  <p className="text-xs sm:text-sm text-slate-400 mt-1">Supports JPG, PNG, GIF up to 10MB</p>
+                </div>
+              ) : (
+                <div
+                  ref={containerRef}
+                  className="relative w-full"
+                  style={{
+                    aspectRatio: `${naturalSize?.width ?? 16}/${naturalSize?.height ?? 9}`,
+                    maxWidth: 900,
+                    minHeight: 240,
+                  }}
+                >
+                  <canvas
+                    ref={canvasRef}
+                    {...pointerEvents}
+                    className="w-full h-full touch-none select-none rounded-xl shadow"
+                    style={{ display: "block" }}
+                  />
+                  <div className="absolute top-4 right-4 flex space-x-2 z-10">
+                    <button
+                      onClick={handleDownload}
+                      className="bg-[#083aa8] text-white p-3 rounded-lg hover:bg-[#0629a0] transition-all duration-200 shadow-lg hover:shadow-xl group"
+                      title="Download Image"
+                    >
+                      <Download className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                    </button>
+                    <button
+                      className="bg-slate-600 text-white p-3 rounded-lg hover:bg-slate-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+                      title="Clear Image"
+                      onClick={() => { setBgImage(null); resetOverlay(); }}
+                    >
+                      <span className="text-lg font-semibold">×</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+              <input
+                id="file-upload"
+                type="file"
+                accept="image/*"
+                style={{ display: "none" }}
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const reader = new FileReader();
+                  reader.onload = (evt) => setBgImage(evt.target?.result as string);
+                  reader.readAsDataURL(file);
+                }}
+              />
+            </div>
+          </div>
+          {/* Controls Panel */}
+          <div className="space-y-6">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-3 sm:p-4 border border-blue-200">
+              <div className="flex items-center space-x-2 mb-1">
+                <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">i</span>
+                </div>
+                <h4 className="font-medium text-blue-800 text-sm sm:text-base">Mouse & Touch Controls</h4>
+              </div>
+              <p className="text-xs sm:text-sm text-blue-700">
+                Tap and drag the overlay directly on the canvas to move, resize from corners, rotate from green handle.
+              </p>
+            </div>
+            <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border border-slate-200">
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-7 h-7 rounded-lg bg-[#083aa8] flex items-center justify-center">
+                  <Move className="w-4 h-4 text-white" />
+                </div>
+                <h3 className="font-semibold text-slate-800 text-base sm:text-lg">Position Controls</h3>
+              </div>
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-slate-600 mb-2">Horizontal Position</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.001"
+                    value={overlay.x_pct}
+                    onChange={(e) => handleSlider("x_pct", e.target.value)}
+                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
+                  />
+                  <div className="flex justify-between text-xs text-slate-500 mt-1 select-none">
+                    <span>Left</span>
+                    <span className="font-medium text-[#083aa8]">{Math.round(overlay.x_pct * 100)}%</span>
+                    <span>Right</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-slate-600 mb-2">Vertical Position</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.001"
+                    value={overlay.y_pct}
+                    onChange={(e) => handleSlider("y_pct", e.target.value)}
+                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
+                  />
+                  <div className="flex justify-between text-xs text-slate-500 mt-1 select-none">
+                    <span>Top</span>
+                    <span className="font-medium text-[#083aa8]">{Math.round(overlay.y_pct * 100)}%</span>
+                    <span>Bottom</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border border-slate-200">
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-7 h-7 rounded-lg bg-[#083aa8] flex items-center justify-center">
+                  <Resize className="w-4 h-4 text-white" />
+                </div>
+                <h3 className="font-semibold text-slate-800 text-base sm:text-lg">Size Controls</h3>
+              </div>
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-slate-600 mb-2">Width</label>
+                  <input
+                    type="range"
+                    min="0.05"
+                    max="0.9"
+                    step="0.001"
+                    value={overlay.w_pct}
+                    onChange={(e) => handleSlider("w_pct", e.target.value)}
+                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
+                  />
+                  <div className="flex justify-between text-xs text-slate-500 mt-1 select-none">
+                    <span>Min</span>
+                    <span className="font-medium text-[#083aa8]">{Math.round(overlay.w_pct * 100)}%</span>
+                    <span>Max</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs sm:text-sm font-medium text-slate-600 mb-2">Height</label>
+                  <input
+                    type="range"
+                    min="0.05"
+                    max="0.9"
+                    step="0.001"
+                    value={overlay.h_pct}
+                    onChange={(e) => handleSlider("h_pct", e.target.value)}
+                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider"
+                  />
+                  <div className="flex justify-between text-xs text-slate-500 mt-1 select-none">
+                    <span>Min</span>
+                    <span className="font-medium text-[#083aa8]">{Math.round(overlay.h_pct * 100)}%</span>
+                    <span>Max</span>
+                  </div>
+                </div>
+                <button
+                  onClick={() =>
+                    setOverlay((prev) => ({ ...prev, w_pct: prev.h_pct }))
+                  }
+                  className="w-full py-2 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all duration-200 text-xs sm:text-sm font-medium"
+                >
+                  Lock Aspect Ratio (Square)
+                </button>
+              </div>
+            </div>
+            <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 border border-slate-200">
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-7 h-7 rounded-lg bg-[#083aa8] flex items-center justify-center">
+                  <RotateCw className="w-4 h-4 text-white" />
+                </div>
+                <h3 className="font-semibold text-slate-800 text-base sm:text-lg">Rotation Control</h3>
+              </div>
+              <div>
+                <input
+                  type="range"
+                  min="0"
+                  max="360"
+                  value={overlay.rotation}
+                  onChange={(e) => handleSlider("rotation", e.target.value)}
+                  className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer slider mb-4"
+                />
+                <div className="flex justify-between text-xs text-slate-500 mb-4 select-none">
+                  <span>0°</span>
+                  <span className="font-medium text-[#083aa8] text-sm sm:text-lg">{Math.round(overlay.rotation)}°</span>
+                  <span>360°</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => handleSlider("rotation", 0)}
+                    className="py-1 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all duration-200 text-xs sm:text-sm font-medium"
+                  >
+                    Reset (0°)
+                  </button>
+                  <button
+                    onClick={() => handleSlider("rotation", 90)}
+                    className="py-1 px-3 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-all duration-200 text-xs sm:text-sm font-medium"
+                  >
+                    90°
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="bg-gradient-to-r from-[#083aa8] to-[#1366f2] rounded-2xl p-4 sm:p-6 text-white">
+              <h3 className="font-semibold mb-3 text-base sm:text-lg">Quick Actions</h3>
+              <div className="space-y-3">
+                <button
+                  onClick={resetOverlay}
+                  className="w-full py-2 px-4 bg-white/20 hover:bg-white/30 rounded-lg transition-all duration-200 text-xs sm:text-sm font-medium"
+                >
+                  Reset All Settings
+                </button>
+                <div className="text-xs sm:text-sm text-blue-100">
+                  <p className="mb-1 sm:mb-2"><strong>Pro Tip:</strong></p>
+                  <p>
+                    Position the overlay in corners or edges for professional watermarking, or center it for bold branding impact.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
-      <div className="text-slate-500 text-sm text-center mt-8 max-w-xl mx-auto">
-        Drag the overlay to move. Drag a blue corner to resize, drag green handle above to rotate.<br/>
-        Responsive UI—works smoothly on all screens and aspect ratios, mouse and touch!
-      </div>
+
+      {/* Footer */}
+      <footer className="bg-white/90 backdrop-blur-sm border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-12">
+        &copy; 2025 Billions Network &ndash; Overlay Image Studio
+      </footer>
     </div>
   );
 }
