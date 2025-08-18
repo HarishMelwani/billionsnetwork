@@ -499,7 +499,7 @@ export default function App() {
             <div className="bg-white rounded-2xl shadow-xl p-4 sm:p-6 md:p-8 border border-slate-200">
               <div className="mb-4 sm:mb-6">
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-800 mb-1 sm:mb-2">
-                  Upload your image and add the Billions Network branding overlay with precision controls
+                  Upload your image and add the Billions Network branding with precision controls
                 </h2>
                 <p className="text-xs sm:text-sm text-slate-600">
                   
@@ -742,7 +742,7 @@ export default function App() {
       </div>
       {/* Footer */}
       <footer className="bg-white/90 backdrop-blur-sm border-t border-slate-200 py-4 text-center text-xs text-slate-500 mt-12">
-        &copy; 2025 Billions Network &ndash; Overlay Image Studio
+        &copy; 2025 Billions Network &ndash; Image Studio
       </footer>
     </div>
   );
