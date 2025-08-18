@@ -156,7 +156,7 @@ function App() {
     if (!canvas) return;
 
     const link = document.createElement('a');
-    link.download = 'billions-network-overlay.png';
+    link.download = 'billions-network.png';
     link.href = canvas.toDataURL('image/png', 1.0);
     link.click();
   }, []);
