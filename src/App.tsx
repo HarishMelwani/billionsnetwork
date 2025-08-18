@@ -433,7 +433,7 @@ export default function App() {
                 <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-[#083aa8] to-[#1366f2] bg-clip-text text-transparent leading-none">
                   Billions Network
                 </h1>
-                <p className="text-xs sm:text-sm text-slate-500">Image Studio</p>
+                <p className="text-xs sm:text-sm text-slate-500">Image Studio by <a href="https://your-link-here.com" target="_blank" rel="noopener noreferrer" className="hover:underline">0xharish</a></p>
               </div>
             </div>
             <button
